@@ -1,5 +1,6 @@
 
 
-from ScholarApis import LocalParsing
+from ScholarApis import GSLinker
 
-LocalParsing()
+gs = GSLinker()
+gs.GSQuery(830952595952692000)

@@ -4,19 +4,24 @@
 # 先创建通过cites和starts得到引用的结果
 # 和将bibtex返回并存储的结果
 
-import requests,time,logging
+import requests,time,logging,os,http
 from bs4 import BeautifulSoup
+from http import cookiejar
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
+
+filepath = os.path.split(__file__)[0]
+filepath = os.path.split(filepath)[0]
     
 class Sessiondef:
     '''
     给出一个定义好的针对Google Scholar的requests对话
     '''
     Global_Provisional_Header = {'Accept':r'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                                 'User-Agent':r'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36'}
+                                 'User-Agent':r'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36',
+                                 'referer':r'https://scholar.google.com/'}
     
     def setting_website_req(self,s):
         '''
@@ -82,14 +87,19 @@ class Sessiondef:
         '''
         创建一个GS会话,并用setting_website_parser初始化会话
         '''
-##        GAE_Global_Proxy = {'https':'127.0.0.1:8087'}
-        GAE_Global_Proxy = None
+        GAE_Global_Proxy = {'https':'127.0.0.1:8087'}
+##        GAE_Global_Proxy = None
         logging.debug('GS会话创建中')
         s = requests.Session()
         s.headers = self.Global_Provisional_Header
         s.proxies  = GAE_Global_Proxy
         logging.debug('GS会话创建完成')
-        s = self.setting_website_parser(s)
+        cookiefile = filepath+r'/storage/cookie'
+        if os.path.exists(cookiefile):
+            logging.debug('从cookie中继续上一次链接')
+            s.cookies = http.cookiejar.FileCookieJar(cookiefile)
+        else:
+            s = self.setting_website_parser(s)
         return s
 
     def ses(self):

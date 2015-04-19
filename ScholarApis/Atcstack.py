@@ -1,6 +1,6 @@
 
 import csv,re
-
+from .ScholarArticle import ScholarArticle
 
 path = re.search(r'(.+)ScholarApis\\Atcstack\.py',__file__).group(1)
 
@@ -20,7 +20,7 @@ class Atcstack(object):
         
     def atcs2csv(self):
         with open(path + r'storage\articles.csv','w',encoding='utf-8') as csvfile:
-            fieldnames = ['cluster', 'title','url','url_citation','url_BibTeX']
+            fieldnames = ['cluster', 'title','url','url_citation','url_BibTeX','citation_amount']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for key in self.articles.keys():
@@ -37,6 +37,15 @@ class Atcstack(object):
                             'Target':tag}
                     writer.writerow(info)
 
+    def csv2atcs(self):
+        with open(path + r'storage\articles.csv','r',encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                atc = ScholarArticle()
+                atc.attrs.update(row)
+                atc.citation_data = atc.attrs['cluster']
+                self.addarticle(atc)
+            
     def atcs2gep(self):
         with open(path + r'storage\articles_gephi.csv','w',encoding='utf-8') as csvfile:
             fieldnames = ['Id', 'Label','url']

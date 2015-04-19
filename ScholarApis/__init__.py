@@ -5,7 +5,7 @@ from .ScholarUtils import ScholarUtils
 from .GSLinker import GSLinker
 from .GShtmltranser import GShtmltranser
 from .ScholarArticle import ScholarArticle
-from .LocalParsing import LocalParsing
+from .LocalParser import LocalParser
 
 import logging
 

@@ -18,11 +18,14 @@ class GShtmltranser(object):
         self.atcstack = atcstack
         self.cluster = cluster
 
-
     def citeamount(self):
-        soup = self.soup.find(name = 'div', attrs={'id': 'gs_ab','role':'navigation'})
-        ctmstr = soup.find(text = re.compile('About \d+ results'))
-        return int(re.match(r'About (\d+) results',ctmstr).group(1))
+        try:
+            soup = self.soup.find(name = 'div', attrs={'id': 'gs_ab','role':'navigation'})
+            ctmstr = soup.find(text = re.compile('About \d+ results'))
+            return int(re.match(r'About (\d+) results',ctmstr).group(1))
+        except:
+            logging.warning('Counting cite amount failed')
+            return 1
 
     def attrparser(self):
         soup = self.soup.find(name = 'div', attrs={'id': 'gs_res_bdy'})
@@ -32,8 +35,8 @@ class GShtmltranser(object):
                 self._clean_article()
                 if self.articl.citation_data:
                     self.handle_article(self.articl)
-                elif self.article['title']:
-                    logging.warning('No citation information in'+self.article['title']+', ignore')  
+##                elif self.article['title']:
+##                    logging.warning('No citation information in'+self.article['title']+', ignore')  
             except:
                 logging.warning('Attrparser failed with:\n'+div.prettify())   
 
@@ -56,6 +59,8 @@ class GShtmltranser(object):
                     self.article['title']=tag.h3.a.find(text=True)
                     self.article['url'] = tag.h3.a['href']
                     if tag.find(name = 'a', text = re.compile(r'Cited by \d+')) :
+                        citelink = tag.find(name = 'a', text = re.compile(r'Cited by \d+'))
+                        self.article['citation_amount']=re.match(r'Cited by (\d+)',citelink.text).group(1)
                         self.article['url_citation'] = tag.find(name = 'a', text = re.compile(r'Cited by \d+')).attrs['href']
                         self.articl.citation_data = re.search(r'cites=(\d+)',self.article['url_citation']).group(1)
                     elif tag.find(name = 'a', text = re.compile(r'All \d+ versions')):
